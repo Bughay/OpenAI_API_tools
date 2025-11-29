@@ -4,7 +4,7 @@ import os
 import json
 load_dotenv()  
 
-api_key = os.getenv("DEEPSEEK_API_KEY")
+# api_key = os.getenv("DEEPSEEK_API_KEY")
 
 class DeepseekFunctionCaller():
     def __init__(self,api_key,user_prompt,tools):
