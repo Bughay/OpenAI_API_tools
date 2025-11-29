@@ -1,5 +1,6 @@
 from llm_modules.function_caller import DeepseekFunctionCaller
 import os
+from openai import OpenAI
 tools = {
     "get_weather": {
         "description": "Get current weather information for a location",
@@ -132,54 +133,105 @@ test_prompts = {
         "Look for winter jackets, max price $150, show 12 items"
     ]
 }
+def get_weather(location: str, unit: str = "celsius"):
+    """Get current weather information for a location"""
+    print(f"🔍 Calling get_weather function now - this is a test")
+    print(f"   📍 Location: {location}")
+    print(f"   🌡️  Unit: {unit}")
+    print(f"   ✅ Weather data retrieved for {location} in {unit}\n")
+    return f"Weather data for {location} in {unit}: 22°C, Sunny"
+
+def calculate_bmi(weight: float, height: float):
+    """Calculate Body Mass Index based on height and weight"""
+    print(f"🔍 Calling calculate_bmi function now - this is a test")
+    print(f"   ⚖️  Weight: {weight} kg")
+    print(f"   📏 Height: {height} m")
+    bmi = weight / (height ** 2)
+    print(f"   📊 BMI calculated: {bmi:.2f}\n")
+    return f"BMI: {bmi:.2f} (Weight: {weight}kg, Height: {height}m)"
+
+def send_email(to: list, subject: str, body: str, priority: str = "normal"):
+    """Send an email to specified recipients"""
+    print(f"🔍 Calling send_email function now - this is a test")
+    print(f"   📧 To: {', '.join(to)}")
+    print(f"   📝 Subject: {subject}")
+    print(f"   📄 Body: {body[:50]}..." if len(body) > 50 else f"   📄 Body: {body}")
+    print(f"   🚨 Priority: {priority}")
+    print(f"   ✅ Email sent successfully!\n")
+    return f"Email sent to {len(to)} recipient(s) with subject '{subject}'"
+
+def search_products(query: str, category: str = None, max_price: float = None, limit: int = 10):
+    """Search for products in the database"""
+    print(f"🔍 Calling search_products function now - this is a test")
+    print(f"   🔎 Query: {query}")
+    print(f"   📂 Category: {category if category else 'Any'}")
+    print(f"   💰 Max Price: ${max_price if max_price else 'No limit'}")
+    print(f"   📊 Limit: {limit} results")
+    print(f"   ✅ Found {limit} products matching '{query}'\n")
+    return f"Found {limit} products for '{query}'" + (f" in {category}" if category else "")
+
+function_map = {
+    "get_weather": get_weather,
+    "calculate_bmi": calculate_bmi,
+    "send_email": send_email,
+    "search_products": search_products
+}
+
+p = "Search for gaming laptops under $1200 and then i need to calculate th my BMI if I'm 165cm and 60kg? then Send email to sarah@company.com with subject 'Project Update' and body should mention that i bought a laptop and my bmi"
+
+api_key = os.getenv("DEEPSEEK_API_KEY")
+
+
+# def react_agent(user_prompt,tools,function_map):
+
+#     tools['task_complete'] = {
+#         "description": "Call this when the task is finished and no more actions are needed",
+#         "parameters": {
+#             "completion_message": {
+#                 "type": "string", 
+#                 "description": "Confirmation that the task is complete",
+#                 "required": False
+#             }}
+#     }
+#     function_map['task_complete'] = lambda: "Task completed"
+
+#     memory = []
+#     while True:
+#         current_prompt = f'Here is the memory {memory}, \n Here is the user prompt = {user_prompt}'
+#         function_caller = DeepseekFunctionCaller(
+#             api_key=api_key,
+#             user_prompt=current_prompt,
+#             tools=tools
+#         )
+#         action = function_caller.get_json_output()
+#         memory.append(f'Reasoning: {action["reasoning"]}')
+        
+#         if action["tool_name"] == "task_complete" or action["tool_name"].strip() == "":
+#             memory.append("No more tools required - ending loop")
+#             print('ENDING THIS WORKED')
+#             break
+            
+#         memory.append(f'Action: function_name {action["tool_name"]}, parameters: {action["parameters"]}')
+        
+#         tool_name = action["tool_name"] 
+#         if tool_name in function_map :
+#             function_result = function_map[tool_name](**action["parameters"])
+#             memory.append(f'Observation: {function_result}')
+            
+#             current_prompt = f"Previous result: {function_result}. What should we do next?"
+#         else:
+#             memory.append(f'Observation: Function {tool_name} not found in function map')
+#             break
+    
+#     return memory
+    
 
 
 
+from llm_modules.react_agent import ReActAgent
+react_agent = ReActAgent(api_key,tools,function_map)
+result = react_agent.run(p)
 
 
-api_key = os.getenv("DEEPSEEK_API_KEY") 
-
-get_weather = 0
-calculate_bmi = 0
-send_email = 0
-search_products = 0
-wrong_tool = 0
-total = 0
-for key,values in test_prompts.items():
-    for prompt in values:
-        function_caller = DeepseekFunctionCaller(
-                api_key=api_key,
-                user_prompt=prompt,
-                tools=tools
-            )
-        function_result = function_caller.get_json_output()
-        total += 1
-        if function_result['tool_name'] == key:
-            print(f"Prompt: {prompt}")
-            print(f"Expected: {key}, Got: {function_result['tool_name']}")
-
-            if key == "get_weather":
-                get_weather += 1
-            elif key == "calculate_bmi":
-                calculate_bmi += 1
-            elif key == "send_email":
-                send_email += 1
-            elif key == "search_products":
-                search_products += 1
-            print("✅ Correct")
-        else:
-            wrong_tool += 1
-            print("❌ Wrong")
-
-
-correct = get_weather + calculate_bmi + send_email + search_products
-wrong = wrong_tool
-
-if total > 0:
-    percentage_correct = (correct / total) * 100
-else:
-    percentage_correct = 0
-
-print(f'Correct: {correct}')
-print(f'Wrong: {wrong}')
-print(f'Percentage of correct: {percentage_correct:.2f}%')
+for string in result:
+    print(string)
