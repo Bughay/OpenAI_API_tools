@@ -41,3 +41,26 @@ Optimized functions for inserting data into a database. Currently, there is supp
 - **sqlite:** Takes in a dictionary, processes it to handle errors, and inserts it into an SQLite database. Ensure the dictionary keys match the table column names.
 
 - **Database class:** A helper class to connect to the SQLite database. It accepts a single parameter, `DATABASE_URL`, for initialization.
+
+
+## DeepseekFunctionCaller
+Optimised for function calling
+
+### Algorithm of Execution
+1- Serialize every tool into a prompt block.
+2- Build system prompt with available tools and desired JSON structure.
+3- Call DeepSeek chat completion.
+4- Parse JSON reply; fallback to direct_response if invalid.
+5- Return dict (no local execution).
+
+## ReActAgent
+
+### Algorithm of Execution
+
+1 - Augment tools with task_complete.
+2 - Initialize empty memory list.
+3 -Repeat until task_complete or max_iter:
+a. Use DeepseekFunctionCaller to choose next tool.
+b. Execute callable from function_map.
+c. Append “Reasoning / Action / Observation” to memory.
+4 -Return full memory trace.

@@ -177,7 +177,6 @@ function_map = {
     "search_products": search_products
 }
 
-p = "Search for gaming laptops under $1200 and then i need to calculate th my BMI if I'm 165cm and 60kg? then Send email to sarah@company.com with subject 'Project Update' and body should mention that i bought a laptop and my bmi"
 
 api_key = os.getenv("DEEPSEEK_API_KEY")
 
@@ -225,8 +224,7 @@ api_key = os.getenv("DEEPSEEK_API_KEY")
     
 #     return memory
     
-
-
+p = "Search for gaming laptops under $1200 and then i need to calculate th my BMI if I'm 165cm and 60kg? then Send email to sarah@company.com with subject 'Project Update' and body should mention that i bought a laptop and my bmi"
 
 from llm_modules.react_agent import ReActAgent
 react_agent = ReActAgent(api_key,tools,function_map)
